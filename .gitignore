@@ -1,0 +1,38 @@
+# ============ qmake / Qt 构建产物 ============
+build/
+build-*/
+debug/
+release/
+*.o
+*.obj
+*.exe
+*.dll
+*.lib
+*.pdb
+*.ilk
+*.exp
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+*.moc
+Makefile
+Makefile.*
+.qmake.stash
+
+# ============ Qt Creator / IDE 本机配置 ============
+.qtcreator/
+.vs/
+.vscode/
+*.pro.user
+*.pro.user.*
+CMakeLists.txt.user*
+
+# ============ 运行时产物 ============
+# 注意：不要用 *.png 一刀切，docs/ 下可能有需要上传的截图
+snapshots/
+
+# ============ 系统垃圾 ============
+Thumbs.db
+desktop.ini
+.DS_Store

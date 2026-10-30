@@ -1,0 +1,479 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CameraWindow</class>
+ <widget class="QWidget" name="CameraWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1320</width>
+    <height>860</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>camera_qt · Qt6 + OpenCV 摄像头采集与处理</string>
+  </property>
+  <layout class="QVBoxLayout" name="rootLayout">
+   <property name="leftMargin">
+    <number>8</number>
+   </property>
+   <property name="topMargin">
+    <number>8</number>
+   </property>
+   <property name="rightMargin">
+    <number>8</number>
+   </property>
+   <property name="bottomMargin">
+    <number>8</number>
+   </property>
+   <item>
+    <widget class="QTabWidget" name="tabs">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="qtCameraTab">
+      <attribute name="title">
+       <string>Qt Multimedia 预览</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="qtTabLayout">
+       <item>
+        <layout class="QHBoxLayout" name="qtBar">
+         <item>
+          <widget class="QLabel" name="qtDeviceLabel">
+           <property name="text">
+            <string>摄像头：</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="qtDeviceBox">
+           <property name="minimumSize">
+            <size>
+             <width>240</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="qtRefreshBtn">
+           <property name="text">
+            <string>重新枚举</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="qtStartBtn">
+           <property name="text">
+            <string>开始预览</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="qtStopBtn">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>停止</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QVideoWidget" name="qtView">
+         <property name="minimumSize">
+          <size>
+           <width>480</width>
+           <height>320</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background:#0d1015;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="qtStatus">
+         <property name="textInteractionFlags">
+          <set>Qt::TextSelectableByMouse</set>
+         </property>
+         <property name="text">
+          <string>这里是 Qt6 自带多媒体库的取景器（QCamera + QVideoWidget）。
+要做图像处理请切到「OpenCV 采集 + 处理」标签页。</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color:#93a0b4;padding:6px;</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="openCvTab">
+      <attribute name="title">
+       <string>OpenCV 采集 + 处理</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="cvTabLayout">
+       <item>
+        <widget class="QSplitter" name="splitter">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <widget class="VideoView" name="view"/>
+         <widget class="QScrollArea" name="controlScroll">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="widgetResizable">
+           <bool>true</bool>
+          </property>
+          <widget class="QWidget" name="controlPanel">
+           <layout class="QVBoxLayout" name="panelLayout">
+            <item>
+             <widget class="QGroupBox" name="camGroup">
+              <property name="title">
+               <string>1. 摄像头</string>
+              </property>
+              <layout class="QVBoxLayout" name="camGroupLayout">
+               <item>
+                <layout class="QFormLayout" name="camForm">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="deviceIndexLabel">
+                   <property name="text">
+                    <string>设备序号</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QSpinBox" name="deviceIndex">
+                   <property name="toolTip">
+                    <string>OpenCV 用设备序号而不是设备名，0 通常是第一个摄像头</string>
+                   </property>
+                   <property name="maximum">
+                    <number>9</number>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QLabel" name="backendLabel">
+                   <property name="text">
+                    <string>采集后端</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QComboBox" name="backendBox"/>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="resolutionLabel">
+                   <property name="text">
+                    <string>请求分辨率</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1">
+                  <widget class="QComboBox" name="resolutionBox"/>
+                 </item>
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="fpsLabel">
+                   <property name="text">
+                    <string>目标帧率</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <widget class="QSpinBox" name="fpsBox">
+                   <property name="suffix">
+                    <string> fps</string>
+                   </property>
+                   <property name="minimum">
+                    <number>1</number>
+                   </property>
+                   <property name="maximum">
+                    <number>60</number>
+                   </property>
+                   <property name="value">
+                    <number>30</number>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="0" colspan="2">
+                  <layout class="QHBoxLayout" name="camBtnRow">
+                   <item>
+                    <widget class="QPushButton" name="openBtn">
+                     <property name="text">
+                      <string>打开摄像头</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="stopBtn">
+                     <property name="enabled">
+                      <bool>false</bool>
+                     </property>
+                     <property name="text">
+                      <string>停止</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item row="5" column="0" colspan="2">
+                  <widget class="QPushButton" name="probeBtn">
+                   <property name="text">
+                    <string>探测设备（序号 0~3）</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="6" column="0" colspan="2">
+                  <widget class="QPlainTextEdit" name="probeLog">
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>110</height>
+                    </size>
+                   </property>
+                   <property name="placeholderText">
+                    <string>点「探测设备」看每个序号能不能打开</string>
+                   </property>
+                   <property name="readOnly">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="procGroup">
+              <property name="title">
+               <string>2. OpenCV 处理</string>
+              </property>
+              <layout class="QVBoxLayout" name="procGroupLayout">
+               <item>
+                <layout class="QFormLayout" name="procForm">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="modeLabel">
+                   <property name="text">
+                    <string>处理模式</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QComboBox" name="modeBox"/>
+                 </item>
+                 <item row="1" column="0" colspan="2">
+                  <widget class="QLabel" name="modeHint">
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="wordWrap">
+                    <bool>true</bool>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">color:#8c9ab4;font-size:12px;</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0">
+                  <widget class="QLabel" name="p1Label">
+                   <property name="text">
+                    <string>参数 1</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="1">
+                  <layout class="QHBoxLayout" name="p1Row">
+                   <item>
+                    <widget class="QSlider" name="p1Slider">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="p1Value">
+                     <property name="minimumSize">
+                      <size>
+                       <width>64</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string>--</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item row="3" column="0">
+                  <widget class="QLabel" name="p2Label">
+                   <property name="text">
+                    <string>参数 2</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="1">
+                  <layout class="QHBoxLayout" name="p2Row">
+                   <item>
+                    <widget class="QSlider" name="p2Slider">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="p2Value">
+                     <property name="minimumSize">
+                      <size>
+                       <width>64</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string>--</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item row="4" column="0" colspan="2">
+                  <widget class="QCheckBox" name="mirrorBox">
+                   <property name="text">
+                    <string>左右镜像（自拍习惯）</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="dispGroup">
+              <property name="title">
+               <string>3. 显示 / 快照</string>
+              </property>
+              <layout class="QVBoxLayout" name="dispGroupLayout">
+               <item>
+                <layout class="QFormLayout" name="dispForm">
+                 <item row="0" column="0">
+                  <widget class="QLabel" name="displayLabel">
+                   <property name="text">
+                    <string>显示内容</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QComboBox" name="displayBox"/>
+                 </item>
+                 <item row="1" column="0" colspan="2">
+                  <widget class="QPushButton" name="snapshotBtn">
+                   <property name="text">
+                    <string>保存快照（原图 + 处理后）</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="0" colspan="2">
+                  <widget class="QPushButton" name="openDirBtn">
+                   <property name="text">
+                    <string>打开快照目录</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="3" column="0" colspan="2">
+                  <widget class="QLabel" name="snapshotInfo">
+                   <property name="text">
+                    <string/>
+                   </property>
+                   <property name="textInteractionFlags">
+                    <set>Qt::TextSelectableByMouse</set>
+                   </property>
+                   <property name="wordWrap">
+                    <bool>true</bool>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">color:#8c9ab4;font-size:12px;</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="statsLabel">
+              <property name="text">
+               <string/>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color:#8ee08e;padding:6px;</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="statusLabel">
+              <property name="text">
+               <string/>
+              </property>
+              <property name="textInteractionFlags">
+               <set>Qt::TextSelectableByMouse</set>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color:#93a0b4;padding:6px;</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="panelSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>VideoView</class>
+   <extends>QWidget</extends>
+   <header>videoview.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
