@@ -16,11 +16,18 @@ rem
 rem  MinGW 版见同目录 build-mingw.bat
 rem ===============================================================
 
-rem ---- 路径配置：按本机实际情况改这几行 ----
-set "QTDIR=D:\qt6\6.11.1\msvc2022_64"
-set "VCVARS=D:\vs2022\VC\Auxiliary\Build\vcvars64.bat"
-set "OPENCV_DIR=D:\opencv\build"
-set "JOM=D:\qt6\Tools\QtCreator\bin\jom\jom.exe"
+rem ---- 路径配置 ----
+rem  下面四行是「本机默认值」。换机器时不用改这个文件，
+rem  提前 set 同名环境变量即可覆盖：
+rem      set QTDIR=D:\qt6\6.11.1\msvc2022_64
+rem      set VCVARS=D:\vs2022\VC\Auxiliary\Build\vcvars64.bat
+rem      set OPENCV_DIR=D:\opencv\build
+rem      set JOM=D:\qt6\Tools\QtCreator\bin\jom\jom.exe
+rem  OPENCV_DIR 同时被 camera_qt.pro 读取（$$(OPENCV_DIR)），两边保持一致。
+if not defined QTDIR      set "QTDIR=D:\qt6\6.11.1\msvc2022_64"
+if not defined VCVARS     set "VCVARS=D:\vs2022\VC\Auxiliary\Build\vcvars64.bat"
+if not defined OPENCV_DIR set "OPENCV_DIR=D:\opencv\build"
+if not defined JOM        set "JOM=D:\qt6\Tools\QtCreator\bin\jom\jom.exe"
 
 set "CONFIGNAME=release"
 if /i "%~1"=="debug" set "CONFIGNAME=debug"

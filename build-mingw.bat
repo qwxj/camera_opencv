@@ -14,9 +14,10 @@ rem
 rem  平时请用 build.bat（MSVC 2022 版），这个脚本只是保留 MinGW 这条路。
 rem ===============================================================
 
-set "QTDIR=D:\qt6\6.11.1\mingw_64"
-set "MINGWDIR=D:\qt6\Tools\mingw1310_64"
-set "OPENCV_DIR=D:\opencv\install-mingw"
+rem ---- 路径配置（可用同名环境变量覆盖）----
+if not defined QTDIR      set "QTDIR=D:\qt6\6.11.1\mingw_64"
+if not defined MINGWDIR   set "MINGWDIR=D:\qt6\Tools\mingw1310_64"
+if not defined OPENCV_DIR set "OPENCV_DIR=D:\opencv\install-mingw"
 
 set "PATH=%QTDIR%\bin;%MINGWDIR%\bin;%PATH%"
 set "OPENCV_DIR=%OPENCV_DIR%"

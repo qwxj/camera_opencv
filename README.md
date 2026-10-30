@@ -11,16 +11,56 @@
 
 ---
 
-## 1. 本机环境
+## 1. 依赖与路径配置
 
-| 组件 | 路径 / 版本 |
-|---|---|
-| Qt | `D:\qt6\6.11.1\msvc2022_64`（6.11.1，含 QtMultimedia） |
-| 编译器 | MSVC 2022，`D:\vs2022`，工具集 14.44.35207 |
-| OpenCV | `D:\opencv\build`（官方预编译包 5.0.0，`x64\vc16`，world 单库） |
+### 依赖
 
-> 也保留了 MinGW 那条路：`build-mingw.bat` + `D:\opencv\install-mingw`（自己编的 MinGW 版，模块是分开的）。
-> `camera_qt.pro` 会根据套件自动选库：`-lopencv_world500` 还是 `-lopencv_core500 -lopencv_imgproc500 ...`。
+| 组件 | 要求 | 本机实测版本 |
+|---|---|---|
+| **Qt** | 6.x，**必须带 Multimedia 模块** | 6.11.1 `msvc2022_64` |
+| **OpenCV** | 4.x / 5.x 均可 | 官方预编译 5.0.0（`x64\vc16`，world 单库） |
+| **编译器** | MSVC 2022（推荐）或 MinGW 64 | MSVC 工具集 14.44.35207 |
+
+### 路径（本机实测值）
+
+| 变量 | 本机路径 | 被谁读取 |
+|---|---|---|
+| `QTDIR` | `D:\qt6\6.11.1\msvc2022_64` | `build.bat`（MinGW 版是 `mingw_64`） |
+| `VCVARS` | `D:\vs2022\VC\Auxiliary\Build\vcvars64.bat` | `build.bat` |
+| `OPENCV_DIR` | `D:\opencv\build` | **`build.bat` 和 `camera_qt.pro` 都读** |
+| `JOM` | `D:\qt6\Tools\QtCreator\bin\jom\jom.exe` | `build.bat`（可选，找不到自动退回 nmake） |
+| `MINGWDIR` | `D:\qt6\Tools\mingw1310_64` | `build-mingw.bat` |
+
+### 换成你自己的路径
+
+**不用改任何文件** —— 提前 `set` 同名环境变量就能覆盖（没设才用上面那些默认值）：
+
+```bat
+set QTDIR=D:\Qt\6.8.0\msvc2022_64
+set VCVARS=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat
+set OPENCV_DIR=D:\opencv\build
+build.bat
+```
+
+`camera_qt.pro` 里用的也是同一套规则：
+
+```qmake
+OPENCV_ROOT = $$(OPENCV_DIR)              # 优先环境变量
+isEmpty(OPENCV_ROOT) {
+    win32-msvc*: OPENCV_ROOT = D:/opencv/build
+    else:        OPENCV_ROOT = D:/opencv/install-mingw
+}
+```
+
+找不到 `opencv2/core.hpp` 时会在 **qmake 阶段**直接报错并提示设 `OPENCV_DIR`，
+不会编到一半才炸。
+
+> 用 **Qt Creator** 打开 `camera_qt.pro` 时不用管 `QTDIR` —— 套件会自己提供；
+> 只要确认选中的是**带 Multimedia 的 Qt6 套件**，并且 `OPENCV_DIR` 环境变量已设。
+
+> 也保留了 MinGW 那条路：`build-mingw.bat` + 自编的 MinGW 版 OpenCV。
+> `.pro` 会根据套件自动选库：MSVC 用 `-lopencv_world500`，MinGW 用
+> `-lopencv_core500 -lopencv_imgproc500 ...`（模块是分开的，没有 world）。
 
 ---
 
@@ -244,7 +284,7 @@ main ──▶ camerawindow ──▶ videoview
   └──▶ cli    └──▶ captureworker ──▶ processing
 ```
 
-- **main.cpp** 只有 ~45 行，**除了 `main()` 一个自定义函数都没有**：
+- **main.cpp** 只有 41 行，**除了 `main()` 一个自定义函数都没有**：
   建 QApplication、设全局开关、把命令行交给该管的人、进事件循环。
   参数解析也不在这里 —— 见下面「开关归谁管」。
 - **cli.cpp** 是"没有界面也能跑"的诊断逻辑，和窗口零耦合，
@@ -334,10 +374,23 @@ return app.exec();
 | 14 | 铅笔素描 | 模糊核 |
 | 15 | 伪彩色 | 色图编号 |
 
-![处理效果预览](docs/effect_preview.png)
+### 自己生成一份效果预览
 
-> 这张拼图是 `camera_qt.exe --grab` 用真实摄像头抓的一帧（1280x720），
-> 再分别跑一遍 16 种模式得到的，可以用同一条命令随时重新生成。
+想直观对比这 16 种模式，一条命令就能出整套对照图（**不用开界面**）：
+
+```bat
+build-msvc\release\camera_qt.exe --grab
+```
+
+产物在 `build-msvc\release\grab_out\`：真实抓的一帧（1280x720）＋ 每种模式各一张，
+共 17 张 PNG，外加 `grab.log` 记录每种模式用的参数和耗时。
+
+没有摄像头时用合成图跑同一套检查：
+
+```bat
+build-msvc\release\camera_qt.exe --selftest
+```
+
 > 14 号「铅笔素描」用的是经典的颜色减淡（color dodge）算法：平坦区域会被算成白纸，
 > 只有边缘留下灰色笔触 —— 所以对着窗户这种大片高亮又没什么细节的画面，
 > 结果就会偏白，把「模糊核」调小可以让笔触更明显。
@@ -411,4 +464,4 @@ return app.exec();
 | `build-msvc\release\snapshots\` | 界面上点「保存快照」存的 PNG（`raw_*.png` / `proc_*.png`） |
 | `build-msvc\release\selftest_out\` | `--selftest` 的输入图、每种模式的输出、日志 |
 | `build-msvc\release\grab_out\` | `--grab` 真实抓帧的结果，同上 |
-| `releaseCamera\` | 旧的 MinGW 影子构建目录（保留） |
+| `releaseCamera\` | 跑 `build-mingw.bat` 时的影子构建目录（平时不产生） |
